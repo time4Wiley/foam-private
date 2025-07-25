@@ -1,0 +1,35 @@
+{
+  "name": "foam-cli",
+  "version": "0.1.0",
+  "description": "CLI tool for Foam knowledge management",
+  "license": "MIT",
+  "bin": {
+    "foam": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "watch": "tsc --watch",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "chalk": "^4.1.2",
+    "glob": "^10.3.10"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/glob": "^8.1.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

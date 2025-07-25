@@ -1,0 +1,5 @@
+node_modules
+dist
+test-workspace
+coverage
+*.log
