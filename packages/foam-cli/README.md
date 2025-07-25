@@ -5,11 +5,21 @@ Command-line interface for Foam knowledge management.
 ## Installation
 
 ```bash
+# Install from npm
+npm install -g @time4peter/foam-cli
+
+# Or using yarn
+yarn global add @time4peter/foam-cli
+```
+
+### Development Installation
+
+```bash
 # From the monorepo root
 yarn install
 yarn workspace foam-cli build
 
-# Link globally
+# Link globally for development
 cd packages/foam-cli
 npm link
 ```
@@ -21,7 +31,7 @@ npm link
 Check for broken wikilinks in your Foam workspace:
 
 ```bash
-foam verify-links [options]
+foam-cli verify-links [options]
 ```
 
 Options:
@@ -34,16 +44,16 @@ Examples:
 
 ```bash
 # Check current directory
-foam verify-links
+foam-cli verify-links
 
 # Check specific directory
-foam verify-links -p ~/my-foam-notes
+foam-cli verify-links -p ~/my-foam-notes
 
 # Check only .md files
-foam verify-links -e md
+foam-cli verify-links -e md
 
 # Output as JSON for scripting
-foam verify-links --json
+foam-cli verify-links --json
 ```
 
 The command will:

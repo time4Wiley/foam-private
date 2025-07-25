@@ -1,10 +1,37 @@
 {
-  "name": "foam-cli",
+  "name": "@time4peter/foam-cli",
   "version": "0.1.0",
-  "description": "CLI tool for Foam knowledge management",
+  "description": "CLI tool for Foam knowledge management - verify wikilinks and more",
   "license": "MIT",
+  "author": "Foam Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/time4Wiley/foam-private.git",
+    "directory": "packages/foam-cli"
+  },
+  "homepage": "https://foambubble.github.io/foam/",
+  "bugs": {
+    "url": "https://github.com/foambubble/foam/issues"
+  },
+  "keywords": [
+    "foam",
+    "knowledge-management",
+    "cli",
+    "wikilinks",
+    "markdown",
+    "notes",
+    "zettelkasten"
+  ],
   "bin": {
-    "foam": "./dist/index.js"
+    "foam-cli": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
     "build": "tsc",
