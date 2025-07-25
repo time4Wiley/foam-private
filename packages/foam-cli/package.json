@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "CLI tool for Foam knowledge management - verify wikilinks and more",
   "license": "MIT",
+  "private": false,
   "author": "Foam Contributors",
   "repository": {
     "type": "git",
