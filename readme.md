@@ -132,6 +132,19 @@ With references you can also make your notes navigable both in GitHub UI as well
   - This becomes very powerful when combined with [note templates](https://foambubble.github.io/foam/user/features/note-templates) and the `Foam: Create New Note from Template` command
 - See your workspace as a connected graph with the `Foam: Show Graph` command
 
+### Command Line Interface
+
+Foam provides a CLI tool for workspace operations:
+
+```bash
+npm install -g @time4peter/foam-cli
+```
+
+Currently available commands:
+- `foam-cli verify-links` - Verify all wikilinks in your workspace and find broken references
+
+See [packages/foam-cli](packages/foam-cli) for more details.
+
 ## Recipes
 
 People use Foam in different ways for different use cases, check out the [recipes](https://foambubble.github.io/foam/user/recipes/recipes) page for inspiration!
