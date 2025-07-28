@@ -1,6 +1,6 @@
 {
   "name": "@time4peter/foam-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI tool for Foam knowledge management - verify wikilinks and more",
   "license": "MIT",
   "private": false,
