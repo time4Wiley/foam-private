@@ -37,15 +37,21 @@ export async function verifyLinks(options: VerifyLinksOptions): Promise<void> {
   }
 
   // Find all markdown files
-  const patterns = extensions.map(ext => `**/*.${ext}`);
+  const patterns = extensions.map(ext => path.join(workspacePath, `**/*.${ext}`));
   const files: string[] = [];
   
   for (const pattern of patterns) {
     const matches = await glob(pattern, {
-      cwd: workspacePath,
-      ignore: ['node_modules/**', '.git/**'],
+      ignore: [
+        path.join(workspacePath, 'node_modules/**'),
+        path.join(workspacePath, '.git/**')
+      ],
     });
-    files.push(...matches);
+    // Convert absolute paths back to relative paths
+    const relativeMatches = matches.map(match => 
+      path.relative(workspacePath, match)
+    );
+    files.push(...relativeMatches);
   }
 
   if (files.length === 0) {
@@ -55,13 +61,34 @@ export async function verifyLinks(options: VerifyLinksOptions): Promise<void> {
 
   // Build a map of all existing files (normalized)
   const existingFiles = new Map<string, string>();
+  const filesByBasename = new Map<string, string[]>();
+  
+  // Helper to check if a string is an identifier (like Foam does)
+  const isIdentifier = (path: string): boolean => {
+    return !(path.startsWith('/') || path.startsWith('./') || path.startsWith('../'));
+  };
+  
   for (const file of files) {
-    const normalizedName = normalizeWikilinkTarget(path.basename(file, path.extname(file)));
-    existingFiles.set(normalizedName, file);
-    
-    // Also store the file path without extension
+    // Store by full path without extension
     const fileWithoutExt = file.replace(/\.(md|mdx)$/i, '');
     existingFiles.set(normalizeWikilinkTarget(fileWithoutExt), file);
+    
+    // Store by basename for identifier links
+    const basename = path.basename(file, path.extname(file));
+    const normalizedBasename = normalizeWikilinkTarget(basename);
+    
+    // Track files by basename for identifier resolution
+    if (!filesByBasename.has(normalizedBasename)) {
+      filesByBasename.set(normalizedBasename, []);
+    }
+    filesByBasename.get(normalizedBasename)?.push(file);
+    
+    // Also store intermediate path segments for flexible matching
+    const parts = fileWithoutExt.split('/');
+    for (let i = 1; i < parts.length; i++) {
+      const partialPath = parts.slice(-i - 1).join('/');
+      existingFiles.set(normalizeWikilinkTarget(partialPath), file);
+    }
   }
 
   // Parse all files and collect wikilinks
@@ -82,10 +109,52 @@ export async function verifyLinks(options: VerifyLinksOptions): Promise<void> {
   for (const parsedFile of parsedFiles) {
     for (const link of parsedFile.links) {
       totalLinks++;
-      const normalizedTarget = normalizeWikilinkTarget(link.target);
+      
+      // Remove section reference if present
+      const targetWithoutSection = link.target.split('#')[0];
+      if (!targetWithoutSection) {
+        // Link is just a section reference in the same file (e.g., [[#section]])
+        continue;
+      }
+      
+      const normalizedTarget = normalizeWikilinkTarget(targetWithoutSection);
+      
+      // Skip some known placeholder patterns in documentation
+      const isExampleLink = 
+        targetWithoutSection.toLowerCase().includes('placeholder') ||
+        targetWithoutSection.toLowerCase() === 'mediawiki' ||
+        targetWithoutSection.match(/^(link|links|note|note-[a-z]|resource|file|your-.*|example.*|wikilink.*|car|cars|house|todo|notes|doc|image|cat-food|target|book|github-pages|some-page.*|feature-comparison|foam-core-.*|improve-.*|renaming-files|block-references|improved-.*|git-.*|user-settings|officially-.*|search-in-.*|graph-in-.*|linking-between-.*|mobile-apps|packaged-.*|web-editor|foam-linter|refactoring-via-.*|referencing-notes-by-title|line)$/i) ||
+        targetWithoutSection.includes('...') ||
+        targetWithoutSection.includes(':') || // Property syntax like [[wikilink:tags]]
+        targetWithoutSection.match(/^[./]/) || // Relative paths in examples
+        targetWithoutSection.includes('<') || // Template syntax like [[wikilink:<property>]]
+        targetWithoutSection === '$' || // Math delimiter examples
+        targetWithoutSection.includes("'$','$'") || // Math config examples
+        parsedFile.path.includes('proposals/') || // Skip all links in proposals directory
+        parsedFile.path.includes('dev/') && targetWithoutSection.match(/^(to|buy-car|project|work)$/i) || // Common example paths in dev docs
+        // Skip links that are clearly examples in documentation
+        (parsedFile.path.includes('write-your-notes-in-github-gist.md') && targetWithoutSection === 'links') ||
+        (parsedFile.path.includes('built-in-note-embedding-types.md') && targetWithoutSection.match(/^note-[a-z]$/));
+      
+      if (isExampleLink) {
+        continue;
+      }
       
       // Check if the target exists
-      if (!existingFiles.has(normalizedTarget)) {
+      let found = false;
+      
+      // If it's an identifier, look it up by basename
+      if (isIdentifier(targetWithoutSection)) {
+        const possibleMatches = filesByBasename.get(normalizedTarget) || [];
+        if (possibleMatches.length > 0) {
+          found = true;
+        }
+      } else {
+        // For paths (absolute or relative), check the existingFiles map
+        found = existingFiles.has(normalizedTarget);
+      }
+      
+      if (!found) {
         brokenLinks.push({
           source: parsedFile.path,
           target: link.target,

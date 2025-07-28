@@ -55,6 +55,45 @@ Line three has [[link-three]].`;
     
     expect(result.links).toHaveLength(0);
   });
+
+  it('should trim whitespace from targets and aliases', () => {
+    const content = '[[ spaces around ]] and [[ target | alias with spaces ]]';
+    const result = parseWikilinks(content, 'test.md');
+    
+    expect(result.links[0]).toMatchObject({
+      target: 'spaces around',
+      alias: undefined,
+    });
+    expect(result.links[1]).toMatchObject({
+      target: 'target',
+      alias: 'alias with spaces',
+    });
+  });
+
+  it('should handle empty content', () => {
+    const result = parseWikilinks('', 'test.md');
+    expect(result).toEqual({
+      path: 'test.md',
+      links: [],
+    });
+  });
+
+  it('should parse wikilinks with spaces', () => {
+    const content = 'Incomplete [[ or ]] brackets [ [link] ]';
+    const result = parseWikilinks(content, 'test.md');
+    
+    // The regex will match [[ or ]] as a valid wikilink
+    expect(result.links).toHaveLength(1);
+    expect(result.links[0].target).toBe('or');
+  });
+
+  it('should handle nested brackets correctly', () => {
+    const content = '[[valid]] but [[not [nested] valid]]';
+    const result = parseWikilinks(content, 'test.md');
+    
+    expect(result.links).toHaveLength(1);
+    expect(result.links[0].target).toBe('valid');
+  });
 });
 
 describe('normalizeWikilinkTarget', () => {
@@ -81,5 +120,28 @@ describe('normalizeWikilinkTarget', () => {
   it('should handle combined transformations', () => {
     expect(normalizeWikilinkTarget('My Page.md')).toBe('my-page');
     expect(normalizeWikilinkTarget('Some File Name.MDX')).toBe('some-file-name');
+  });
+
+  it('should handle paths with directories', () => {
+    expect(normalizeWikilinkTarget('docs/my-note')).toBe('docs/my-note');
+    expect(normalizeWikilinkTarget('Docs/My Note.md')).toBe('docs/my-note');
+  });
+
+  it('should handle empty strings', () => {
+    expect(normalizeWikilinkTarget('')).toBe('');
+  });
+
+  it('should preserve hyphens', () => {
+    expect(normalizeWikilinkTarget('already-hyphenated')).toBe('already-hyphenated');
+  });
+
+  it('should handle special characters', () => {
+    expect(normalizeWikilinkTarget('Note@#$%')).toBe('note@#$%');
+    expect(normalizeWikilinkTarget('Note_with_underscores')).toBe('note_with_underscores');
+  });
+
+  it('should not remove other extensions', () => {
+    expect(normalizeWikilinkTarget('file.txt')).toBe('file.txt');
+    expect(normalizeWikilinkTarget('image.png')).toBe('image.png');
   });
 });
