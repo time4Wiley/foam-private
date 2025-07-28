@@ -1,0 +1,23 @@
+# Source files
+src/
+*.ts
+!dist/**/*.d.ts
+
+# Test files
+**/*.test.*
+**/*.spec.*
+jest.config.js
+coverage/
+
+# Config files
+.eslintrc.js
+tsconfig.json
+
+# Development files
+test-workspace/
+*.log
+.DS_Store
+
+# Git files
+.git/
+.gitignore

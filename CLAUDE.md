@@ -62,10 +62,26 @@ yarn install-extension
 yarn publish-extension
 ```
 
+### CLI Development
+```bash
+# Build the CLI package
+yarn workspace foam-cli build
+
+# Run tests
+yarn workspace foam-cli test
+
+# Publish to npm (requires OTP)
+./scripts/publish-foam-cli.sh
+
+# Test CLI commands locally
+node packages/foam-cli/dist/index.js verify-links
+```
+
 ## Architecture Overview
 
 ### Monorepo Structure
 - **packages/foam-vscode**: Main VS Code extension
+- **packages/foam-cli**: Command-line interface for Foam operations
 - Uses Yarn workspaces with Lerna for monorepo management
 - Node.js >= 18 required
 
