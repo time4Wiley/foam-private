@@ -7,7 +7,7 @@
   "author": "Foam Contributors",
   "repository": {
     "type": "git",
-    "url": "https://github.com/time4Wiley/foam-private.git",
+    "url": "git+https://github.com/time4Wiley/foam-private.git",
     "directory": "packages/foam-cli"
   },
   "homepage": "https://foambubble.github.io/foam/",
@@ -24,7 +24,7 @@
     "zettelkasten"
   ],
   "bin": {
-    "foam-cli": "./dist/index.js"
+    "foam-cli": "dist/index.js"
   },
   "files": [
     "dist",

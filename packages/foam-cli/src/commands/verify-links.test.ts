@@ -21,7 +21,7 @@ const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
 
 // Mock process.exit
 const mockProcessExit = jest.spyOn(process, 'exit').mockImplementation((code?: string | number) => {
-  throw new Error(`Process exited with code ${code}`);
+  throw new Error(`process.exit called with "${code}"`);
 });
 
 describe('verify-links command', () => {
@@ -48,7 +48,7 @@ describe('verify-links command', () => {
         extensions: 'md',
         json: false,
         color: true,
-      })).rejects.toThrow('Process exited with code 1');
+      })).rejects.toThrow('process.exit called with "1"');
 
       expect(mockConsoleError).toHaveBeenCalledWith(
         expect.stringContaining(`Error: Workspace path does not exist: ${nonExistentPath}`)
@@ -112,12 +112,14 @@ describe('verify-links command', () => {
         'This note has a [[broken-link]] and [[another-broken-link]]'
       );
 
-      await expect(verifyLinks({
+      await verifyLinks({
         path: tempDir,
         extensions: 'md',
         json: false,
         color: true,
-      })).rejects.toThrow('Process exited with code 1');
+      });
+
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
 
       expect(mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining('Broken links: ')
@@ -214,6 +216,7 @@ describe('verify-links command', () => {
       expect(mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining('✓ All wikilinks are valid!')
       );
+      expect(mockProcessExit).not.toHaveBeenCalled();
     });
   });
 
@@ -227,12 +230,14 @@ describe('verify-links command', () => {
 
       mockedFs.readFileSync.mockReturnValue('Note with [[broken-link]]');
 
-      await expect(verifyLinks({
+      await verifyLinks({
         path: tempDir,
         extensions: 'md',
         json: true,
         color: true,
-      })).rejects.toThrow('Process exited with code 1');
+      });
+
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
 
       // Check that JSON.stringify was called (via console.log)
       const jsonCall = mockConsoleLog.mock.calls.find(call => 
@@ -290,12 +295,14 @@ describe('verify-links command', () => {
         .mockReturnValueOnce('File 1: [[broken1]] and [[broken2]]')
         .mockReturnValueOnce('File 2: [[broken3]]');
 
-      await expect(verifyLinks({
+      await verifyLinks({
         path: tempDir,
         extensions: 'md',
         json: false,
         color: true,
-      })).rejects.toThrow('Process exited with code 1');
+      });
+
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
 
       // Check that output groups broken links by file
       const logCalls = mockConsoleLog.mock.calls.map(call => call[0]?.toString() || '');
@@ -385,12 +392,14 @@ describe('verify-links command', () => {
         '[[non-existent-1]] [[non-existent-2]] [[non-existent-3]]'
       );
 
-      await expect(verifyLinks({
+      await verifyLinks({
         path: tempDir,
         extensions: 'md',
         json: false,
         color: true,
-      })).rejects.toThrow('Process exited with code 1');
+      });
+
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
 
       expect(mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining('Broken links: ')
@@ -408,12 +417,14 @@ describe('verify-links command', () => {
         'Valid: [[good-link]] Invalid: [[ ]] [[]] [[   ]]'
       );
 
-      await expect(verifyLinks({
+      await verifyLinks({
         path: tempDir,
         extensions: 'md',
         json: false,
         color: true,
-      })).rejects.toThrow('Process exited with code 1');
+      });
+
+      expect(mockProcessExit).toHaveBeenCalledWith(1);
 
       // Only the valid link should be counted
       const logCalls = mockConsoleLog.mock.calls.map(call => call[0]?.toString() || '');
